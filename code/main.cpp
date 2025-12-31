@@ -24,14 +24,20 @@ struct CellState{
 
 Game game;
 CellState cell_state;
+int curserI, curserJ;
+
+// crowling through a cell's nieghbors
+int IndX[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+int IndY[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
 
 //=============================================Function prototypes===============================
-void ShowBoard(int curserI, int curserJ);
+void ShowBoard(int i, int j);
 void ShowMenu();
 void GameMode(); // single player mode or two player mode
 void PlayGame();
-void PlaceCell(int curserI, int curserJ);
+void PlaceCell(int i, int j);
 void SwitchTurn();
+bool CheckValidMove(int i, int j);
 
 
 //=============================================Main Function=====================================
@@ -82,7 +88,7 @@ void PlayGame(){
 
     // moving through the board
     bool running = true;
-    int curserI = 0, curserJ = 0;
+    
     while(running){
         ShowBoard(curserI, curserJ);
         char pressed_key = getch();
@@ -141,10 +147,13 @@ void PlayGame(){
             }
             break;
         case '\r':
-            PlaceCell(curserI, curserJ);
-            SwitchTurn();
-            curserI = 0;
-            curserJ = 0;
+            if(CheckValidMove(curserI, curserJ)){
+                PlaceCell(curserI, curserJ);
+                SwitchTurn();
+            }
+            else{
+                cout << "Cant Place there!";
+            }
             break;
         case 'm': // temparary
             running = false;
@@ -155,7 +164,7 @@ void PlayGame(){
     ShowMenu();
 }
 
-void ShowBoard(int curserI = -1, int curserJ = -1){ // curser is the selected cell by keyboard
+void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboard
     system("cls");
     for(int i = 0; i < board_size; i++){
         for(int j = 0; j < board_size; j++){
@@ -251,13 +260,24 @@ void GameMode(){
 
 
 // changing the selected cell
-void PlaceCell(int curserI, int curserJ){
+void PlaceCell(int i, int j){
     if(game.turn == 1){
-        game.board[curserI][curserJ] = cell_state.black;
+        game.board[i][j] = cell_state.black;
     }
     else{
-        game.board[curserI][curserJ] = cell_state.white;
+        game.board[i][j] = cell_state.white;
     }
+
+    for(int i = board_size - 1; i >= 0; i--){
+        for(int j = board_size - 1; j >= 0; j--){
+            if(game.board[i][j] == cell_state.empty){
+                curserI = i;
+                curserJ = j;
+            }
+        }
+    }
+
+
 }
 
 
@@ -265,4 +285,28 @@ void PlaceCell(int curserI, int curserJ){
 void SwitchTurn(){
     if(game.turn == 1) game.turn = 2;
     else game.turn = 1;
+}
+
+bool CheckValidMove(int curserI, int curserJ){
+    int valid, invalid;
+    if(game.turn == 1){
+        valid = cell_state.white;
+    }
+    else{
+        valid = cell_state.black;
+    }
+
+    for(int x : IndX){
+        if(curserI + x >= 0 && curserI + x < board_size){
+            for(int y : IndY){
+                if(curserJ + y >= 0 && curserJ + y < board_size){
+                    if(game.board[curserI + x][curserJ + y] == valid){
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+
 }

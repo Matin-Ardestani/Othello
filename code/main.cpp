@@ -10,12 +10,20 @@ using namespace std;
 
 //==============================================Structures & Global variables=======================================
 const int board_size = 8;
+
+struct ColorChanger{
+    int startI, startJ;
+    int endI, endJ;
+    int directionX, directionY;
+};
+
 struct Game{
     int board[board_size][board_size];
     int turn;
     string player1name;
     string player2name;
     bool isSinglePlayerMode;
+    ColorChanger color_changer;
 };
 
 struct CellState{
@@ -38,8 +46,8 @@ void PlayGame();
 void PlaceCell(int i, int j);
 void SwitchTurn();
 bool CheckValidTurn(int turn);
-bool CheckValidMove(int i, int j);
-void ChangeCells(int i, int j, int played_turn);
+bool CheckValidMove(int i, int j, bool change_color);
+void ChangeColor();
 
 
 //=============================================Main Function=====================================
@@ -152,8 +160,9 @@ void PlayGame(){
             break;
 
         case '\r': // selecting the cell
-            if(CheckValidMove(curserI, curserJ)){
+            if(CheckValidMove(curserI, curserJ, true)){
                 PlaceCell(curserI, curserJ);
+                // ChangeColor();
                 SwitchTurn();
             }
             else{
@@ -304,7 +313,8 @@ void SwitchTurn(){
 }
 
 // checking if the cell is available for the player
-bool CheckValidMove(int curserI, int curserJ){
+bool CheckValidMove(int curserI, int curserJ, bool change_color){
+    bool validMove = false;
     if(game.board[curserI][curserJ] != cell_state.empty) {
         return false;
     }
@@ -340,12 +350,22 @@ bool CheckValidMove(int curserI, int curserJ){
                     break;
                 }
                 if(game.board[x][y] == myColor){
-                    return true;
+
+                    game.color_changer.startI = curserI;
+                    game.color_changer.startJ = curserJ;
+                    game.color_changer.endI = x;
+                    game.color_changer.endJ = y;
+                    game.color_changer.directionX = dx;
+                    game.color_changer.directionY = dy;
+                    
+                    if(change_color) ChangeColor();
+
+                    validMove = true;
                 }
             }
         }
     }
-    return false;
+    return validMove;
 
 }
 
@@ -353,24 +373,29 @@ bool CheckValidMove(int curserI, int curserJ){
 bool CheckValidTurn(int turn){
     for(int i = 0; i < board_size; i++){
         for(int j = 0; j < board_size; j++){
-            if(game.board[i][j] == cell_state.empty && CheckValidMove(i, j))
+            if(game.board[i][j] == cell_state.empty && CheckValidMove(i, j, false))
                 return true;
         }
     }
     return false;
 }
 
-// void ChangeCells(int i, int j, int played_turn){
-//     int opposite_turn = (played_turn == 1 ? 2 : 1);
-//     for(int x : IndX){
-//         if(curserI + x >= 0 && curserI + x < board_size){
-//             for(int y : IndY){
-//                 if(curserJ + y >= 0 && curserJ + y < board_size){
-//                     if(game.board[curserI + x][curserJ + y] == opposite_turn){
+// changin cells after a valid move
+void ChangeColor(){
+    int opposite_color = (game.turn == 1 ? cell_state.black : cell_state.white);
+    int x = game.color_changer.startI;
+    int y = game.color_changer.startJ;
+    while(true){
+        x += game.color_changer.directionX;
+        y += game.color_changer.directionY;
 
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+        if(game.board[x][y] != opposite_color){
+            game.board[x][y] = opposite_color;
+        }
+        else{
+            break;
+        }
+
+        
+    }
+}

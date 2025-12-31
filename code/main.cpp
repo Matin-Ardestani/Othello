@@ -68,9 +68,10 @@ int main(){
 
 //============================================Functions=========================================
 
-// showing the board and the state of it
+// THE GAME
 void PlayGame(){
 
+    // recieving names and declaring turns
     if(!game.isSinglePlayerMode){
         cout << "Enter Player 1 Name: ";
         cin >> game.player1name;
@@ -164,6 +165,7 @@ void PlayGame(){
     ShowMenu();
 }
 
+// drawing the game board
 void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboard
     system("cls");
     for(int i = 0; i < board_size; i++){
@@ -179,6 +181,7 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
         cout << endl;
     }
 
+    // showing whose turn it is
     if(game.turn == 1) cout << "Turn: " << game.player1name << u8" \u25CF";
     else if(game.turn == 2 && !game.isSinglePlayerMode) cout << "Turn: " << game.player2name << u8" \u25CB";
     else cout << "Turn: Bot " << u8" \u25CB";
@@ -240,11 +243,11 @@ void GameMode(){
 
     switch(choice)
     {
-    case '1':
+    case '1': // Single player mode
         game.isSinglePlayerMode = true;
         PlayGame();
         break;
-    case '2':
+    case '2': // Two player mode
         game.isSinglePlayerMode = false;
         PlayGame();
         break;
@@ -268,6 +271,7 @@ void PlaceCell(int i, int j){
         game.board[i][j] = cell_state.white;
     }
 
+    // finding the first cell that is empty to place the curser
     for(int i = board_size - 1; i >= 0; i--){
         for(int j = board_size - 1; j >= 0; j--){
             if(game.board[i][j] == cell_state.empty){
@@ -287,6 +291,7 @@ void SwitchTurn(){
     else game.turn = 1;
 }
 
+// checking if the cell is available for the player
 bool CheckValidMove(int curserI, int curserJ){
     int valid, invalid;
     if(game.turn == 1){

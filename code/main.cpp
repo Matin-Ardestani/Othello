@@ -37,7 +37,9 @@ void GameMode(); // single player mode or two player mode
 void PlayGame();
 void PlaceCell(int i, int j);
 void SwitchTurn();
+bool CheckValidTurn(int turn);
 bool CheckValidMove(int i, int j);
+void ChangeCells(int i, int j, int played_turn);
 
 
 //=============================================Main Function=====================================
@@ -89,6 +91,7 @@ void PlayGame(){
 
     // moving through the board
     bool running = true;
+    int opposite_turn;
     
     while(running){
         ShowBoard(curserI, curserJ);
@@ -147,7 +150,8 @@ void PlayGame(){
                 curserJ--;
             }
             break;
-        case '\r':
+
+        case '\r': // selecting the cell
             if(CheckValidMove(curserI, curserJ)){
                 PlaceCell(curserI, curserJ);
                 SwitchTurn();
@@ -159,6 +163,14 @@ void PlayGame(){
         case 'm': // temparary
             running = false;
             break;
+        }
+
+        opposite_turn = (game.turn == 1 ? 2 : 1);
+        if(!CheckValidTurn(game.turn) && CheckValidTurn(opposite_turn)){
+            SwitchTurn();
+        }
+        else if(!CheckValidTurn(game.turn) && !CheckValidTurn(opposite_turn)){
+            running = false;
         }
 
     }
@@ -293,21 +305,42 @@ void SwitchTurn(){
 
 // checking if the cell is available for the player
 bool CheckValidMove(int curserI, int curserJ){
-    int valid, invalid;
-    if(game.turn == 1){
-        valid = cell_state.white;
-    }
-    else{
-        valid = cell_state.black;
+    if(game.board[curserI][curserJ] != cell_state.empty) {
+        return false;
     }
 
-    for(int x : IndX){
-        if(curserI + x >= 0 && curserI + x < board_size){
-            for(int y : IndY){
-                if(curserJ + y >= 0 && curserJ + y < board_size){
-                    if(game.board[curserI + x][curserJ + y] == valid){
-                        return true;
-                    }
+    int opponent;
+    int myColor;
+    if(game.turn == 1){
+        myColor = cell_state.black;
+        opponent = cell_state.white;
+    }
+    else{
+        myColor = cell_state.white;
+        opponent = cell_state.black;
+    }
+
+    for(int k = 0; k < 8; k++){
+        int dx = IndX[k];
+        int dy = IndY[k];
+        int x = curserI + dx;
+        int y = curserJ + dy;
+
+        if(x >= 0 && x < board_size && y >= 0 && y < board_size && game.board[x][y] == opponent){
+            
+            // going on in the same direction
+            while(true){
+                x += dx;
+                y += dy;
+
+                if(x < 0 || x >= board_size || y < 0 || y >= board_size) {
+                    break;
+                }
+                if(game.board[x][y] == cell_state.empty){
+                    break;
+                }
+                if(game.board[x][y] == myColor){
+                    return true;
                 }
             }
         }
@@ -315,3 +348,29 @@ bool CheckValidMove(int curserI, int curserJ){
     return false;
 
 }
+
+// checking if the player can play a move
+bool CheckValidTurn(int turn){
+    for(int i = 0; i < board_size; i++){
+        for(int j = 0; j < board_size; j++){
+            if(game.board[i][j] == cell_state.empty && CheckValidMove(i, j))
+                return true;
+        }
+    }
+    return false;
+}
+
+// void ChangeCells(int i, int j, int played_turn){
+//     int opposite_turn = (played_turn == 1 ? 2 : 1);
+//     for(int x : IndX){
+//         if(curserI + x >= 0 && curserI + x < board_size){
+//             for(int y : IndY){
+//                 if(curserJ + y >= 0 && curserJ + y < board_size){
+//                     if(game.board[curserI + x][curserJ + y] == opposite_turn){
+
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }

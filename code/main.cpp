@@ -30,6 +30,8 @@ void ShowBoard(int curserI, int curserJ);
 void ShowMenu();
 void GameMode(); // single player mode or two player mode
 void PlayGame();
+void PlaceCell(int curserI, int curserJ);
+void SwitchTurn();
 
 
 //=============================================Main Function=====================================
@@ -62,13 +64,27 @@ int main(){
 
 // showing the board and the state of it
 void PlayGame(){
+
+    if(!game.isSinglePlayerMode){
+        cout << "Enter Player 1 Name: ";
+        cin >> game.player1name;
+        cout << "Enter Player 2 Name: ";
+        cin >> game.player2name;
+        game.turn = 1;
+    }
+    else{
+        cout << "Enter Player 1 Name: ";
+        cin >> game.player1name;
+        game.player2name = "Bot";
+        game.turn = 1;
+    }
+
+
+    // moving through the board
     bool running = true;
     int curserI = 0, curserJ = 0;
-    int counter = 0;
-
     while(running){
         ShowBoard(curserI, curserJ);
-        counter = 0;
         char pressed_key = getch();
         switch(pressed_key)
         {
@@ -124,6 +140,12 @@ void PlayGame(){
                 curserJ--;
             }
             break;
+        case '\r':
+            PlaceCell(curserI, curserJ);
+            SwitchTurn();
+            curserI = 0;
+            curserJ = 0;
+            break;
         case 'm': // temparary
             running = false;
             break;
@@ -148,7 +170,9 @@ void ShowBoard(int curserI = -1, int curserJ = -1){ // curser is the selected ce
         cout << endl;
     }
 
-    // showing turn
+    if(game.turn == 1) cout << "Turn: " << game.player1name << u8" \u25CF";
+    else if(game.turn == 2 && !game.isSinglePlayerMode) cout << "Turn: " << game.player2name << u8" \u25CB";
+    else cout << "Turn: Bot " << u8" \u25CB";
 
 
 }
@@ -213,6 +237,7 @@ void GameMode(){
         break;
     case '2':
         game.isSinglePlayerMode = false;
+        PlayGame();
         break;
     default:
         cout << "Invalid Input!\tTry again.";
@@ -222,4 +247,22 @@ void GameMode(){
 
 
     ShowBoard(0, 0);
+}
+
+
+// changing the selected cell
+void PlaceCell(int curserI, int curserJ){
+    if(game.turn == 1){
+        game.board[curserI][curserJ] = cell_state.black;
+    }
+    else{
+        game.board[curserI][curserJ] = cell_state.white;
+    }
+}
+
+
+// switchin turn in game
+void SwitchTurn(){
+    if(game.turn == 1) game.turn = 2;
+    else game.turn = 1;
 }

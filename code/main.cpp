@@ -64,26 +64,67 @@ int main(){
 void PlayGame(){
     bool running = true;
     int curserI = 0, curserJ = 0;
+    int counter = 0;
 
     while(running){
         ShowBoard(curserI, curserJ);
-
+        counter = 0;
         char pressed_key = getch();
         switch(pressed_key)
         {
-        case 'w': case 'W':
-            if(curserI - 1 >= 0) curserI--;
+        case 'w': case 'W': // UP
+            if(curserI - 1 >= 0){
+                int temp = curserI;
+                while(game.board[curserI - 1][curserJ] != cell_state.empty){
+                    curserI--;
+                }
+                if(curserI < 0){
+                    curserI = temp;
+                    break;
+                }
+                curserI--;
+            }
             break;
-        case 's': case 'S':
-            if(curserI + 1 < board_size) curserI++;
+        case 's': case 'S': // DOWN
+            if(curserI + 1 < board_size){
+                int temp = curserI;
+                while(game.board[curserI + 1][curserJ] != cell_state.empty){
+                    curserI++;
+                }
+                if(curserI < 0){
+                    curserI = temp;
+                    break;
+                }
+                curserI++;
+            }
             break;
-        case 'd': case 'D':
-            if(curserJ + 1 < board_size) curserJ++;
+        case 'd': case 'D': // RIGHT
+            if(curserJ + 1 < board_size){
+                int temp = curserJ;
+                while(game.board[curserI][curserJ + 1] != cell_state.empty){
+                    curserJ++;
+                }
+                if(curserJ < 0){
+                    curserJ = temp;
+                    break;
+                }
+                curserJ++;
+            }
             break;
-        case 'a': case 'A':
-            if(curserJ - 1 >= 0) curserJ--;
+        case 'a': case 'A': // LEFT
+            if(curserJ - 1 >= 0){
+                int temp = curserJ;
+                while(game.board[curserI][curserJ - 1] != cell_state.empty){
+                    curserJ--;
+                }
+                if(curserJ < 0){
+                    curserJ = temp;
+                    break;
+                }
+                curserJ--;
+            }
             break;
-        case 'm':
+        case 'm': // temparary
             running = false;
             break;
         }

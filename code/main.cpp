@@ -26,9 +26,10 @@ Game game;
 CellState cell_state;
 
 //=============================================Function prototypes===============================
-void ShowBoard();
+void ShowBoard(int curserI, int curserJ);
 void ShowMenu();
 void GameMode(); // single player mode or two player mode
+void PlayGame();
 
 
 //=============================================Main Function=====================================
@@ -47,7 +48,7 @@ int main(){
     game.board[4][4] = cell_state.white;
     game.board[3][4] = cell_state.black;
     game.board[4][3] = cell_state.black;
-
+    
 
     ShowMenu();
 
@@ -60,15 +61,55 @@ int main(){
 //============================================Functions=========================================
 
 // showing the board and the state of it
-void ShowBoard(){
+void PlayGame(){
+    bool running = true;
+    int curserI = 0, curserJ = 0;
+
+    while(running){
+        ShowBoard(curserI, curserJ);
+
+        char pressed_key = getch();
+        switch(pressed_key)
+        {
+        case 'w': case 'W':
+            if(curserI - 1 >= 0) curserI--;
+            break;
+        case 's': case 'S':
+            if(curserI + 1 < board_size) curserI++;
+            break;
+        case 'd': case 'D':
+            if(curserJ + 1 < board_size) curserJ++;
+            break;
+        case 'a': case 'A':
+            if(curserJ - 1 >= 0) curserJ--;
+            break;
+        case 'm':
+            running = false;
+            break;
+        }
+
+    }
+    ShowMenu();
+}
+
+void ShowBoard(int curserI = -1, int curserJ = -1){ // curser is the selected cell by keyboard
+    system("cls");
     for(int i = 0; i < board_size; i++){
         for(int j = 0; j < board_size; j++){
+            if(curserI == i && curserJ == j){
+                cout << u8"\u25A0";
+                continue;
+            }
             if(game.board[i][j] == cell_state.empty) cout << u8"\u25A1";
             else if(game.board[i][j] == cell_state.black) cout << u8"\u25CF";  
-            else if(game.board[i][j] == cell_state.white) cout << u8"\u25CB";  
+            else if(game.board[i][j] == cell_state.white) cout << u8"\u25CB";
         }
         cout << endl;
     }
+
+    // showing turn
+
+
 }
 
 // menu
@@ -122,5 +163,22 @@ void GameMode(){
          << "2. Two Player Mode\n";
 
     char choice = getch();
-    ShowBoard();
+
+    switch(choice)
+    {
+    case '1':
+        game.isSinglePlayerMode = true;
+        PlayGame();
+        break;
+    case '2':
+        game.isSinglePlayerMode = false;
+        break;
+    default:
+        cout << "Invalid Input!\tTry again.";
+        GameMode();
+        break;
+    }
+
+
+    ShowBoard(0, 0);
 }

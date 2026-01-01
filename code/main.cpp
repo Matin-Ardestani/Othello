@@ -4,6 +4,7 @@
 #include <conio.h> // inputs
 #include <cstdlib> // random
 #include <ctime> // time
+#include <fstream>
 
 using namespace std;
 
@@ -23,6 +24,8 @@ struct Game{
     string player1name;
     string player2name;
     bool isSinglePlayerMode;
+    int black_count;
+    int white_count;
     ColorChanger color_changer;
 };
 
@@ -33,6 +36,8 @@ struct CellState{
 Game game;
 CellState cell_state;
 int curserI, curserJ;
+
+fstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::in | ios::out | ios::app);
 
 // crowling through a cell's nieghbors
 int IndX[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
@@ -148,7 +153,7 @@ void PlayGame(){
         case 'a': case 'A': // LEFT
             if(curserJ - 1 >= 0){
                 int temp = curserJ;
-                while(game.board[curserI][curserJ - 1] != cell_state.empty){
+                while(game.board[curserI][curserJ - 1] == cell_state.black || game.board[curserI][curserJ - 1] == cell_state.white){
                     curserJ--;
                 }
                 if(curserJ < 0){
@@ -162,14 +167,13 @@ void PlayGame(){
         case '\r': // selecting the cell
             if(CheckValidMove(curserI, curserJ, true)){
                 PlaceCell(curserI, curserJ);
-                // ChangeColor();
                 SwitchTurn();
             }
             else{
                 cout << "Cant Place there!";
             }
             break;
-        case 'm': // temparary
+        case ' ': // closing game
             running = false;
             break;
         }
@@ -178,7 +182,33 @@ void PlayGame(){
         if(!CheckValidTurn(game.turn) && CheckValidTurn(opposite_turn)){
             SwitchTurn();
         }
+        // end of game
         else if(!CheckValidTurn(game.turn) && !CheckValidTurn(opposite_turn)){
+            ShowBoard(-1, -1);
+            time_t now = time(0);
+            if(game.black_count > game.white_count){
+                cout << endl << game.player1name << " WON!";
+                history << game.player1name << "," << game.black_count << ","
+                        << game.player2name << "," << game.white_count << ","
+                        << game.player1name << ","
+                        << ctime(&now);
+            }
+            else if(game.black_count < game.white_count){
+                cout << endl << game.player2name << " WON!";
+                history << game.player1name << "," << game.black_count << ","
+                        << game.player2name << "," << game.white_count << ","
+                        << game.player2name << ","
+                        << ctime(&now);
+            }
+            else{
+                cout << endl << "TIE GAME!";
+                history << game.player1name << "," << game.black_count << ","
+                        << game.player2name << "," << game.white_count << ","
+                        << "tie" << ","
+                        << ctime(&now);
+            }
+            
+            char temp = getch(); // keeping the page alive to see the result
             running = false;
         }
 
@@ -189,6 +219,8 @@ void PlayGame(){
 // drawing the game board
 void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboard
     system("cls");
+    game.black_count = 0;
+    game.white_count = 0;
     for(int i = 0; i < board_size; i++){
         for(int j = 0; j < board_size; j++){
             if(curserI == i && curserJ == j){
@@ -196,8 +228,14 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
                 continue;
             }
             if(game.board[i][j] == cell_state.empty) cout << u8"\u25A1";
-            else if(game.board[i][j] == cell_state.black) cout << u8"\u25CF";  
-            else if(game.board[i][j] == cell_state.white) cout << u8"\u25CB";
+            else if(game.board[i][j] == cell_state.black){
+                cout << u8"\u25CF";  
+                game.black_count++;
+            }
+            else if(game.board[i][j] == cell_state.white){
+                cout << u8"\u25CB";
+                game.white_count++;
+            }
         }
         cout << endl;
     }
@@ -206,6 +244,9 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
     if(game.turn == 1) cout << "Turn: " << game.player1name << u8" \u25CF";
     else if(game.turn == 2 && !game.isSinglePlayerMode) cout << "Turn: " << game.player2name << u8" \u25CB";
     else cout << "Turn: Bot " << u8" \u25CB";
+
+    // showing each players discs
+    cout << "\n" << game.player1name << "\'s discs:" << game.black_count << "\t" << game.player2name << "\'s discs:" << game.white_count;
 
 
 }

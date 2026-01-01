@@ -1,1 +1,1 @@
-player1name,player1discs,player2name,player2discs,winner,gamedate
+matin,45,ali,18,matin,Thu Jan  1 22:32:39 2026

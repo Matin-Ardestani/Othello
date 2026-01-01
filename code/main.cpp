@@ -1,6 +1,7 @@
 // ==============================================Importing Libraries==============================
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include <conio.h> // inputs
 #include <cstdlib> // random
 #include <ctime> // time
@@ -38,6 +39,10 @@ CellState cell_state;
 int curserI, curserJ;
 
 fstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::in | ios::out | ios::app);
+/*
+    history file format:
+    player1name,player1discs,player2name,player2discs,winner,gamedate
+*/
 
 // crowling through a cell's nieghbors
 int IndX[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
@@ -53,6 +58,7 @@ void SwitchTurn();
 bool CheckValidTurn(int turn);
 bool CheckValidMove(int i, int j, bool change_color);
 void ChangeColor();
+void ShowHistory();
 
 
 //=============================================Main Function=====================================
@@ -188,21 +194,27 @@ void PlayGame(){
             time_t now = time(0);
             if(game.black_count > game.white_count){
                 cout << endl << game.player1name << " WON!";
-                history << game.player1name << "," << game.black_count << ","
+                // saving game info
+                history << endl
+                        << game.player1name << "," << game.black_count << ","
                         << game.player2name << "," << game.white_count << ","
                         << game.player1name << ","
                         << ctime(&now);
             }
             else if(game.black_count < game.white_count){
                 cout << endl << game.player2name << " WON!";
-                history << game.player1name << "," << game.black_count << ","
+                // saving game info
+                history << endl
+                        << game.player1name << "," << game.black_count << ","
                         << game.player2name << "," << game.white_count << ","
                         << game.player2name << ","
                         << ctime(&now);
             }
             else{
                 cout << endl << "TIE GAME!";
-                history << game.player1name << "," << game.black_count << ","
+                // saving game info
+                history << endl 
+                        << game.player1name << "," << game.black_count << ","
                         << game.player2name << "," << game.white_count << ","
                         << "tie" << ","
                         << ctime(&now);
@@ -278,8 +290,8 @@ void ShowMenu(){
         temp = getch();
         ShowMenu();
         break;
-    case '3':
-        // History
+    case '3': // History
+        ShowHistory();
         break;
     case '4': // exit
         return; // closing terminal
@@ -399,7 +411,7 @@ bool CheckValidMove(int curserI, int curserJ, bool change_color){
                     game.color_changer.directionX = dx;
                     game.color_changer.directionY = dy;
                     
-                    if(change_color) ChangeColor();
+                    if(change_color) ChangeColor(); // if we are checking the cell for a player move then we change the colors int the same process
 
                     validMove = true;
                 }
@@ -440,3 +452,57 @@ void ChangeColor(){
         
     }
 }
+
+// showing history (crawling through history.txt file which is considered a database for this game)
+void ShowHistory(){
+    system("cls");
+
+    cout << left
+         << setw(10) << "P1"
+         << setw(8)  << "D1"
+         << setw(10) << "P2"
+         << setw(8)  << "D2"
+         << setw(10) << "Winner"
+         << setw(10) << "Date"
+         << endl;
+
+    cout << string(56, '-') << endl;
+
+
+    string line;
+    string player1, player2, winner, date;
+    string player1discs, player2discs;
+    int splitter[5];
+    while(getline(history, line)){
+        for(int i = 0; i < 5; i++){
+            if(i == 0)
+                splitter[i] = line.find(",");
+            else
+                splitter[i] = line.find(",", splitter[i - 1] + 1);
+        }
+
+        player1 = line.substr(0, splitter[0]);
+        player1discs = line.substr(splitter[0] + 1, splitter[1] - splitter[0] - 1);
+        player2 = line.substr(splitter[1] + 1, splitter[2] - splitter[1] - 1);
+        player2discs = line.substr(splitter[2] + 1, splitter[3] - splitter[2] - 1);
+        winner = line.substr(splitter[3] + 1, splitter[4] - splitter[3] - 1);
+        date = line.substr(splitter[4] + 1);
+
+        cout << left
+            << setw(10) << player1
+            << setw(8)  << player1discs
+            << setw(10) << player2
+            << setw(8)  << player2discs
+            << setw(10) << winner
+            << setw(10) << date
+            << endl;
+
+    }
+
+
+    cout << "\n\nPress any key to go to menu.";
+    char temp = getch();
+    ShowMenu();
+
+}
+

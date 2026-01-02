@@ -236,17 +236,23 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
     for(int i = 0; i < board_size; i++){
         for(int j = 0; j < board_size; j++){
             if(curserI == i && curserJ == j){
-                cout << u8"\u25A0";
+                cout << u8"\u25A0"; // full square
                 continue;
             }
-            if(game.board[i][j] == cell_state.empty) cout << u8"\u25A1";
+            if(game.board[i][j] == cell_state.empty && !CheckValidMove(i, j, false)){
+                cout << u8"\u25A1"; // empty square
+            }
             else if(game.board[i][j] == cell_state.black){
-                cout << u8"\u25CF";  
+                cout << u8"\u25CF";  // black circle
                 game.black_count++;
             }
             else if(game.board[i][j] == cell_state.white){
-                cout << u8"\u25CB";
+                cout << u8"\u25CB"; // white circle
                 game.white_count++;
+            }
+
+            else if(game.board[i][j] == cell_state.empty && CheckValidMove(i, j, false)){
+                cout << "*";
             }
         }
         cout << endl;
@@ -410,7 +416,6 @@ bool CheckValidMove(int curserI, int curserJ, bool change_color){
                     game.color_changer.endJ = y;
                     game.color_changer.directionX = dx;
                     game.color_changer.directionY = dy;
-                    
                     if(change_color) ChangeColor(); // if we are checking the cell for a player move then we change the colors int the same process
 
                     validMove = true;

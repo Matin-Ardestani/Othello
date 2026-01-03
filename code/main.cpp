@@ -6,6 +6,7 @@
 #include <cstdlib> // random
 #include <ctime> // time
 #include <fstream>
+#include <windows.h>
 
 using namespace std;
 
@@ -38,7 +39,7 @@ Game game;
 CellState cell_state;
 int curserI, curserJ;
 
-fstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::in | ios::out | ios::app);
+// fstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::in | ios::out | ios::app);
 /*
     history file format:
     player1name,player1discs,player2name,player2discs,winner,gamedate
@@ -59,12 +60,14 @@ bool CheckValidTurn(int turn);
 bool CheckValidMove(int i, int j, bool change_color);
 void ChangeColor();
 void ShowHistory();
+void BotMove();
 
 
 //=============================================Main Function=====================================
 int main(){
 
     system("chcp 65001"); // for showing the unicode characters in terminal
+    srand(static_cast<unsigned int>(time(nullptr)));
 
 
     // preparing board for the start of the game
@@ -98,14 +101,13 @@ void PlayGame(){
         cin >> game.player1name;
         cout << "Enter Player 2 Name: ";
         cin >> game.player2name;
-        game.turn = 1;
     }
     else{
         cout << "Enter Player 1 Name: ";
         cin >> game.player1name;
         game.player2name = "Bot";
-        game.turn = 1;
     }
+    game.turn = 1;
 
 
     // moving through the board
@@ -114,116 +116,94 @@ void PlayGame(){
     
     while(running){
         ShowBoard(curserI, curserJ);
-        char pressed_key = getch();
-        switch(pressed_key)
-        {
-        case 'w': case 'W': // UP
-            if(curserI - 1 >= 0){
-                int temp = curserI;
-                while(game.board[curserI - 1][curserJ] != cell_state.empty){
-                    curserI--;
-                }
-                if(curserI < 0){
-                    curserI = temp;
-                    break;
-                }
-                curserI--;
-            }
-            break;
-        case 's': case 'S': // DOWN
-            if(curserI + 1 < board_size){
-                int temp = curserI;
-                while(game.board[curserI + 1][curserJ] != cell_state.empty){
-                    curserI++;
-                }
-                if(curserI < 0){
-                    curserI = temp;
-                    break;
-                }
-                curserI++;
-            }
-            break;
-        case 'd': case 'D': // RIGHT
-            if(curserJ + 1 < board_size){
-                int temp = curserJ;
-                while(game.board[curserI][curserJ + 1] != cell_state.empty){
-                    curserJ++;
-                }
-                if(curserJ < 0){
-                    curserJ = temp;
-                    break;
-                }
-                curserJ++;
-            }
-            break;
-        case 'a': case 'A': // LEFT
-            if(curserJ - 1 >= 0){
-                int temp = curserJ;
-                while(game.board[curserI][curserJ - 1] == cell_state.black || game.board[curserI][curserJ - 1] == cell_state.white){
-                    curserJ--;
-                }
-                if(curserJ < 0){
-                    curserJ = temp;
-                    break;
-                }
-                curserJ--;
-            }
-            break;
 
-        case '\r': // selecting the cell
-            if(CheckValidMove(curserI, curserJ, true)){
-                PlaceCell(curserI, curserJ);
-                SwitchTurn();
-            }
-            else{
-                cout << "Cant Place there!";
-            }
-            break;
-        case ' ': // closing game
-            running = false;
-            break;
-        }
-
-        opposite_turn = (game.turn == 1 ? 2 : 1);
-        if(!CheckValidTurn(game.turn) && CheckValidTurn(opposite_turn)){
+        if(game.isSinglePlayerMode && game.turn == 2){
+            Sleep(500); // a delay for palyer to see bot's move
+            BotMove();
             SwitchTurn();
         }
-        // end of game
-        else if(!CheckValidTurn(game.turn) && !CheckValidTurn(opposite_turn)){
-            ShowBoard(-1, -1);
-            time_t now = time(0);
-            if(game.black_count > game.white_count){
-                cout << endl << game.player1name << " WON!";
-                // saving game info
-                history << endl
-                        << game.player1name << "," << game.black_count << ","
-                        << game.player2name << "," << game.white_count << ","
-                        << game.player1name << ","
-                        << ctime(&now);
+        else {
+            char pressed_key = getch();
+            switch(pressed_key)
+            {
+            case 'w': case 'W': 
+                if(curserI > 0) curserI--;
+                break;
+            case 's': case 'S': 
+                if(curserI < board_size - 1) curserI++;
+                break;
+            case 'd': case 'D': 
+                if(curserJ < board_size - 1) curserJ++;
+                break;
+            case 'a': case 'A': 
+                if(curserJ > 0) curserJ--;
+                break;
+
+            case '\r': // Enter
+                if(CheckValidMove(curserI, curserJ, true)){
+                    PlaceCell(curserI, curserJ);
+                    SwitchTurn();
+                }
+                else{
+                    cout << "\a";
+                }
+                break;
+            case ' ': // emergency exit
+                running = false;
+                break;
             }
-            else if(game.black_count < game.white_count){
-                cout << endl << game.player2name << " WON!";
-                // saving game info
-                history << endl
-                        << game.player1name << "," << game.black_count << ","
-                        << game.player2name << "," << game.white_count << ","
-                        << game.player2name << ","
-                        << ctime(&now);
-            }
-            else{
-                cout << endl << "TIE GAME!";
-                // saving game info
-                history << endl 
-                        << game.player1name << "," << game.black_count << ","
-                        << game.player2name << "," << game.white_count << ","
-                        << "tie" << ","
-                        << ctime(&now);
-            }
-            
-            char temp = getch(); // keeping the page alive to see the result
-            running = false;
         }
 
+        // end of game or switch turn because of no valid move
+        opposite_turn = (game.turn == 1 ? 2 : 1);
+        bool currentHasMove = CheckValidTurn(game.turn);
+        bool opponentHasMove = CheckValidTurn(opposite_turn);
+
+        if(!currentHasMove && opponentHasMove){
+            cout << "\nNo Valid Moves for " << (game.turn == 1 ? game.player1name : game.player2name) << "! Passing turn...";
+            getch();
+            SwitchTurn();
+        }
+        else if(!currentHasMove && !opponentHasMove){ // end of game
+            ShowBoard(-1, -1);
+            time_t now = time(0);
+            string winnerName = "Tie";
+
+            if(game.black_count > game.white_count) winnerName = game.player1name;
+            else if(game.black_count < game.white_count) winnerName = game.player2name;
+
+            cout << "\n========================\n";
+            if (winnerName == "Tie") cout << "       TIE GAME!";
+            else cout << "   WINNER: " << winnerName;
+            cout << "\n========================\n";
+
+            ofstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::app);
+            if(history.is_open()){
+
+                // AI generated
+                char* dt = ctime(&now); // converting datetime to string
+                // deleting \n from the end of the time string
+                string dateStr = string(dt); 
+                if (!dateStr.empty() && dateStr[dateStr.length()-1] == '\n') {
+                    dateStr.erase(dateStr.length()-1);
+                }
+                //...
+
+                history << game.player1name << "," << game.black_count << ","
+                         << game.player2name << "," << game.white_count << ","
+                         << winnerName << ","
+                         << dateStr << endl;
+                
+                history.close();
+                cout << "Game saved to history." << endl;
+            } else {
+                cout << "Error saving history!" << endl;
+            }
+            
+            cout << "Press any key to exit...";
+            getch(); 
+            running = false;
+        }
     }
     ShowMenu();
 }
@@ -233,6 +213,9 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
     system("cls");
     game.black_count = 0;
     game.white_count = 0;
+
+    bool show_hint = (!game.isSinglePlayerMode) || (game.turn == 1);
+
     for(int i = 0; i < board_size; i++){
         for(int j = 0; j < board_size; j++){
             if(curserI == i && curserJ == j){
@@ -251,7 +234,7 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
                 game.white_count++;
             }
 
-            else if(game.board[i][j] == cell_state.empty && CheckValidMove(i, j, false)){
+            else if(show_hint && game.board[i][j] == cell_state.empty && CheckValidMove(i, j, false)){
                 cout << "*";
             }
         }
@@ -352,14 +335,14 @@ void PlaceCell(int i, int j){
     }
 
     // finding the first cell that is empty to place the curser
-    for(int i = board_size - 1; i >= 0; i--){
-        for(int j = board_size - 1; j >= 0; j--){
-            if(game.board[i][j] == cell_state.empty){
-                curserI = i;
-                curserJ = j;
-            }
-        }
-    }
+    // for(int i = board_size - 1; i >= 0; i--){
+    //     for(int j = board_size - 1; j >= 0; j--){
+    //         if(game.board[i][j] == cell_state.empty){
+    //             curserI = i;
+    //             curserJ = j;
+    //         }
+    //     }
+    // }
 
 
 }
@@ -473,6 +456,12 @@ void ShowHistory(){
 
     cout << string(56, '-') << endl;
 
+    ifstream history("history.txt"); // باز کردن برای خواندن
+    if(!history.is_open()){
+        cout << "No history found or could not open file.\n";
+        getch(); ShowMenu(); return;
+    }
+
 
     string line;
     string player1, player2, winner, date;
@@ -505,9 +494,61 @@ void ShowHistory(){
     }
 
 
+    history.close();
     cout << "\n\nPress any key to go to menu.";
-    char temp = getch();
+    getch();
     ShowMenu();
 
 }
 
+void BotMove(){
+
+    if(CheckValidTurn(game.turn)){
+
+        // allocating an array for bot's available moves
+        int **availabe_moves = new int*[board_size*board_size];
+        for(int i = 0; i < (board_size*board_size); i++){
+            availabe_moves[i] = new int[2];
+        }
+
+
+
+        // adding available moves to the array
+        int counter = 0;
+        for(int i = 0; i < board_size; i++){
+            for(int j = 0; j < board_size; j++){
+                if(CheckValidMove(i, j, false)){
+                    availabe_moves[counter][0] = i;
+                    availabe_moves[counter][1] = j;
+                    counter++;
+                }
+            }
+        }
+
+
+        if (counter > 0) {
+            int randomIndex = rand() % counter; 
+
+            curserI = availabe_moves[randomIndex][0];
+            curserJ = availabe_moves[randomIndex][1];
+
+            CheckValidMove(curserI, curserJ, true);
+            PlaceCell(curserI, curserJ);
+        }
+
+        
+        // deallocating availabe moves array
+        for(int i = 0; i < board_size*board_size; i++){
+            delete[] availabe_moves[i];
+        }
+        delete[] availabe_moves;
+
+    }
+    else{
+        SwitchTurn();
+    }
+
+
+
+
+}

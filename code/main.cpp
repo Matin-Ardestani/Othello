@@ -51,7 +51,6 @@ Game game;
 CellState cell_state;
 int curserI, curserJ;
 
-// fstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::in | ios::out | ios::app);
 /*
     history file format:
     player1name,player1discs,player2name,player2discs,winner,gamedate
@@ -189,7 +188,7 @@ void PlayGame(){
             else cout << "   WINNER: " << winnerName;
             cout << "\n========================\n";
 
-            ofstream history("C:\\Users\\LOQ\\Desktop\\Othello\\code\\history.txt", ios::app);
+            ofstream history("history.txt", ios::app);
             if(history.is_open()){
 
                 // AI generated
@@ -228,7 +227,7 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
 
     bool show_hint = (!game.isSinglePlayerMode) || (game.turn == 1);
 
-    cout << "\n      A   B   C   D   E   F   G   H\n";
+    cout << "\n      A  B  C  D  E  F  G  H\n";
     for(int i = 0; i < board_size; i++){
         cout << "   " << (i + 1) << " ";
         for(int j = 0; j < board_size; j++){
@@ -561,8 +560,6 @@ void BotMove(){
     else{
         SwitchTurn();
     }
-
-
 
 
 }

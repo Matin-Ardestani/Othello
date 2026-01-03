@@ -14,6 +14,18 @@ using namespace std;
 //==============================================Structures & Global variables=======================================
 const int board_size = 8;
 
+// --- ANSI Color Codes ---
+const string RESET = "\033[0m";
+const string BLACK_TXT = "\033[30m";  // black text
+const string RED_TXT = "\033[31m";    // red text
+const string GREEN_TXT = "\033[32m";  // green text
+const string YELLOW_TXT = "\033[33m"; // yellow text
+const string WHITE_TXT = "\033[97m";  // white text
+
+const string BG_GREEN = "\033[42m";   // green background
+const string BG_YELLOW = "\033[43m";  // yellow background
+const string BG_DEFAULT = "\033[49m"; // default background
+
 struct ColorChanger{
     int startI, startJ;
     int endI, endJ;
@@ -216,29 +228,31 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
 
     bool show_hint = (!game.isSinglePlayerMode) || (game.turn == 1);
 
+    cout << "\n      A   B   C   D   E   F   G   H\n";
     for(int i = 0; i < board_size; i++){
+        cout << "   " << (i + 1) << " ";
         for(int j = 0; j < board_size; j++){
             if(curserI == i && curserJ == j){
-                cout << u8"\u25A0"; // full square
+                cout << BG_YELLOW << BLACK_TXT << u8" \u25A0 " << RESET; // full square
                 continue;
             }
             if(game.board[i][j] == cell_state.empty && !CheckValidMove(i, j, false)){
-                cout << u8"\u25A1"; // empty square
+                cout << BG_GREEN << BLACK_TXT << u8" \u25A1 " << RESET; // empty square
             }
             else if(game.board[i][j] == cell_state.black){
-                cout << u8"\u25CF";  // black circle
+                cout << BG_GREEN << BLACK_TXT << u8" \u25CF " << RESET;  // black circle
                 game.black_count++;
             }
             else if(game.board[i][j] == cell_state.white){
-                cout << u8"\u25CB"; // white circle
+                cout << BG_GREEN << WHITE_TXT << u8" \u25CF " << RESET; // white circle
                 game.white_count++;
             }
 
             else if(show_hint && game.board[i][j] == cell_state.empty && CheckValidMove(i, j, false)){
-                cout << "*";
+                cout << BG_GREEN << RED_TXT << " * " << RESET;
             }
         }
-        cout << endl;
+        cout << RESET << endl;
     }
 
     // showing whose turn it is

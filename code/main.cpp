@@ -1,12 +1,12 @@
 // ==============================================Importing Libraries==============================
 #include <iostream>
 #include <string>
-#include <iomanip>
+#include <iomanip> // cout
 #include <conio.h> // inputs
 #include <cstdlib> // random
 #include <ctime> // time
-#include <fstream>
-#include <windows.h>
+#include <fstream> // file
+#include <windows.h> // delay
 
 using namespace std;
 

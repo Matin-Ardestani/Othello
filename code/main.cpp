@@ -214,6 +214,19 @@ void PlayGame(){
             cout << "Press any key to exit...";
             getch(); 
             running = false;
+
+            // preparing board for the start of the game
+            for(int i = 0; i < board_size; i++){
+                for(int j = 0; j < board_size; j++){
+                    game.board[i][j] = cell_state.empty;
+                }
+            }
+            game.board[3][3] = cell_state.white;
+            game.board[4][4] = cell_state.white;
+            game.board[3][4] = cell_state.black;
+            game.board[4][3] = cell_state.black;
+
+
         }
     }
     ShowMenu();

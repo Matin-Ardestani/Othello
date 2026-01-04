@@ -12,7 +12,7 @@ using namespace std;
 
 
 //==============================================Structures & Global variables=======================================
-const int board_size = 8;
+int board_size = 8;
 
 // --- ANSI Color Codes ---
 const string RESET = "\033[0m";
@@ -38,7 +38,7 @@ struct ColorChanger{
 };
 
 struct Game{
-    int board[board_size][board_size];
+    int **board;
     int turn;
     string player1name;
     string player2name;
@@ -77,6 +77,9 @@ bool CheckValidMove(int i, int j, bool change_color);
 void ChangeColor();
 void ShowHistory();
 void BotMove();
+void SelectBoardSize();
+void AllocateBoard();
+void DeallocateBoard();
 
 
 //=============================================Main Function=====================================
@@ -87,15 +90,7 @@ int main(){
 
 
     // preparing board for the start of the game
-    for(int i = 0; i < board_size; i++){
-        for(int j = 0; j < board_size; j++){
-            game.board[i][j] = cell_state.empty;
-        }
-    }
-    game.board[3][3] = cell_state.white;
-    game.board[4][4] = cell_state.white;
-    game.board[3][4] = cell_state.black;
-    game.board[4][3] = cell_state.black;
+    game.board = nullptr;
     
 
     ShowMenu();
@@ -176,9 +171,12 @@ void PlayGame(){
                 break;
             case ' ': // emergency exit
                 running = false;
+                // DeallocateBoard();
                 break;
             }
         }
+
+        if(!running) break;
 
         // end of game or switch turn because of no valid move
         opposite_turn = (game.turn == 1 ? 2 : 1);
@@ -229,6 +227,7 @@ void PlayGame(){
             cout << "Press any key to exit...";
             getch(); 
             running = false;
+            // DeallocateBoard();
 
             // preparing board for the start of the game
             for(int i = 0; i < board_size; i++){
@@ -244,7 +243,68 @@ void PlayGame(){
 
         }
     }
+    DeallocateBoard();
     ShowMenu();
+}
+
+// selecting size of the board (6 or 8 or 10)
+void SelectBoardSize(){
+    while(true){
+        system("cls");
+        cout << "\n\n";
+        cout << MARGIN << BOLD << CYAN_TXT << u8"╔══════════════════════════════════╗" << RESET <<endl;
+        cout << MARGIN << BOLD << CYAN_TXT << u8"║        SELECT BOARD SIZE         ║" << RESET <<endl;
+        cout << MARGIN << BOLD << CYAN_TXT << u8"╚══════════════════════════════════╝" << RESET <<endl;
+        cout << endl;
+
+        cout << MARGIN << YELLOW_TXT << "[1]" << WHITE_TXT << " Small  (6 x 6)" << endl;
+        cout << MARGIN << YELLOW_TXT << "[2]" << WHITE_TXT << " Normal (8 x 8)" << endl;
+        cout << MARGIN << YELLOW_TXT << "[3]" << WHITE_TXT << " Large  (10 x 10)" << endl;
+        cout << endl << MARGIN << "Select size: ";
+            
+        char choice = getch();
+        if(choice == '1'){
+            board_size = 6;
+            break;
+        }
+        else if(choice == '2'){
+            board_size = 8;
+            break;
+        }
+        else if(choice == '3'){
+            board_size = 10;
+            break;
+        }
+        else cout << '\a';
+    }
+}
+
+void AllocateBoard(){
+    game.board = new int*[board_size];
+    for(int i = 0; i < board_size; i++){
+        game.board[i] = new int[board_size];
+    }
+
+    for(int i = 0; i < board_size; i++){
+        for(int j = 0; j < board_size; j++){
+            game.board[i][j] = cell_state.empty;
+        }
+    }
+    int mid = board_size / 2;   
+    game.board[mid-1][mid-1] = cell_state.white;
+    game.board[mid][mid]     = cell_state.white;
+    game.board[mid-1][mid]   = cell_state.black;
+    game.board[mid][mid-1]   = cell_state.black;
+}
+
+void DeallocateBoard(){
+    if(game.board != nullptr) {
+        for(int i = 0; i < board_size; i++){
+            delete[] game.board[i];
+        }
+        delete[] game.board;
+        game.board = nullptr;
+    }
 }
 
 // drawing the game board
@@ -257,7 +317,8 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
 
     cout << "\n      A  B  C  D  E  F  G  H\n";
     for(int i = 0; i < board_size; i++){
-        cout << "   " << (i + 1) << " ";
+        if(i+1 != 10) cout << "   " << (i + 1) << " ";
+        else cout << "  " << (i + 1) << " ";
         for(int j = 0; j < board_size; j++){
             if(curserI == i && curserJ == j){
                 cout << BG_YELLOW << BLACK_TXT << u8" \u25A0 " << RESET; // full square
@@ -335,6 +396,8 @@ void ShowMenu(){
     switch(choice)
     {
     case '1': // new game
+        SelectBoardSize();
+        AllocateBoard();
         GameMode();
         break;
     case '2': // help

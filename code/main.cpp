@@ -26,6 +26,11 @@ const string BG_GREEN = "\033[42m";   // green background
 const string BG_YELLOW = "\033[43m";  // yellow background
 const string BG_DEFAULT = "\033[49m"; // default background
 
+const string CYAN_TXT = "\033[36m";
+const string MAGENTA_TXT = "\033[35m";
+const string BOLD = "\033[1m";
+const string MARGIN = "      ";
+
 struct ColorChanger{
     int startI, startJ;
     int endI, endJ;
@@ -107,15 +112,25 @@ int main(){
 void PlayGame(){
 
     // recieving names and declaring turns
-    if(!game.isSinglePlayerMode){
-        cout << "Enter Player 1 Name: ";
+    system("cls");
+    cout << "\n\n";
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╔══════════════════════════════════╗" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"║            GAME SETUP            ║" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╚══════════════════════════════════╝" << RESET << endl;
+    cout << endl;
+    if(!game.isSinglePlayerMode){ // two player mode
+        cout << MARGIN << YELLOW_TXT << "Player 1 Name (Black): " << CYAN_TXT;
         cin >> game.player1name;
-        cout << "Enter Player 2 Name: ";
+        cout << RESET << "\n";
+
+        cout << MARGIN << YELLOW_TXT << "Player 2 Name (White): " << CYAN_TXT;
         cin >> game.player2name;
+        cout << RESET;
     }
     else{
-        cout << "Enter Player 1 Name: ";
+        cout << MARGIN << YELLOW_TXT << "Enter Your Name: " << CYAN_TXT;
         cin >> game.player1name;
+        cout << RESET;
         game.player2name = "Bot";
     }
     game.turn = 1;
@@ -267,13 +282,25 @@ void ShowBoard(int i = -1, int j = -1){ // curser is the selected cell by keyboa
         cout << RESET << endl;
     }
 
-    // showing whose turn it is
-    if(game.turn == 1) cout << "Turn: " << game.player1name << u8" \u25CF";
-    else if(game.turn == 2 && !game.isSinglePlayerMode) cout << "Turn: " << game.player2name << u8" \u25CB";
-    else cout << "Turn: Bot " << u8" \u25CB";
-
-    // showing each players discs
-    cout << "\n" << game.player1name << "\'s discs:" << game.black_count << "\t" << game.player2name << "\'s discs:" << game.white_count;
+    cout << RESET << "\n";
+    cout << MARGIN << CYAN_TXT << u8"══════════════════════════════════" << RESET << endl;
+    string p2name = (game.isSinglePlayerMode ? "Bot" : game.player2name);
+    cout << MARGIN << BLACK_TXT << RESET << game.player1name << ": " 
+         << BOLD <<  game.black_count << RESET;
+    cout << "          "; 
+    cout << WHITE_TXT << RESET << p2name << ": " 
+         << BOLD << game.white_count << RESET << endl;
+    cout << endl;
+    cout << MARGIN << " Turn: ";
+    
+    if(game.turn == 1) {
+        cout << BG_YELLOW << BLACK_TXT << "  " << u8"\u25CF " << game.player1name << "  " << RESET;
+    } 
+    else {
+        cout << BG_YELLOW << BLACK_TXT << "  " << u8"\u25CB " << p2name << "  " << RESET;
+    }
+    
+    cout << endl;
 
 
 }
@@ -283,11 +310,24 @@ void ShowMenu(){
 
     system("cls");
 
-    cout << "Main Menu:\n" 
-         << "1. New Game\n"
-         << "2. Help\n"
-         << "3. Game History\n"
-         << "4. Exit\n";
+    cout << "\n\n";
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╔══════════════════════════════════╗" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"║           OTHELLO GAME           ║" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╚══════════════════════════════════╝" << RESET << endl;
+    cout << endl;
+
+    cout << MARGIN << YELLOW_TXT << "[1]" << WHITE_TXT << " Start New Game" << endl;
+    cout << MARGIN << "    " << GREEN_TXT << "Play vs Bot or Friend" << RESET << "\n\n";
+
+    cout << MARGIN << YELLOW_TXT << "[2]" << WHITE_TXT << " How to Play (Help)" << endl;
+    cout << MARGIN << "    " << GREEN_TXT << "Learn the rules" << RESET << "\n\n";
+
+    cout << MARGIN << YELLOW_TXT << "[3]" << WHITE_TXT << " Game History" << endl;
+    cout << MARGIN << "    " << GREEN_TXT << "View past match results" << RESET << "\n\n";
+
+    cout << MARGIN << YELLOW_TXT << "[4]" << WHITE_TXT << " Exit" << endl;
+    
+    cout << endl << MARGIN << "Select an option: ";
 
     char choice = getch();
     char temp;
@@ -299,10 +339,23 @@ void ShowMenu(){
         break;
     case '2': // help
         system("cls");
-        cout << "Othello is a two-player strategy board game played on an 8×8 grid using black and white discs. Players take turns placing one of their discs on an empty square, with black always going first. A move is only legal if the placed disc brackets one or more of the opponent’s discs in a straight line (horizontal, vertical, or diagonal) between the new disc and another disc of the same color; all such bracketed discs are then flipped to the current player’s color. If a player has no valid moves, their turn is skipped. The game continues until neither player can make a move, usually when the board is full. The winner is the player with the most discs of their color on the board at the end of the game.";
-        cout << "\n\nPress any key to go to menu.";
+        cout << "\n\n";
+        cout << MARGIN << BOLD << MAGENTA_TXT << "=== HOW TO PLAY OTHELLO ===" << RESET << "\n\n";
+        cout << MARGIN << "Othello is a strategy board game for two players." << endl;
+        cout << MARGIN << "Played on an 8x8 uncheckered board." << endl << endl;
+        cout << MARGIN << YELLOW_TXT << "1. Objective:" << RESET << endl;
+        cout << MARGIN << "   Have the majority of discs in your color at the end." << endl << endl;
+        cout << MARGIN << YELLOW_TXT << "2. The Rules:" << RESET << endl;
+        cout << MARGIN << "   - Black always moves first." << endl;
+        cout << MARGIN << "   - Place a disc to 'bracket' opponent's discs." << endl;
+        cout << MARGIN << "   - Bracketing can be horizontal, vertical, or diagonal." << endl;
+        cout << MARGIN << "   - Bracketed discs are flipped to your color." << endl << endl;
+        cout << MARGIN << YELLOW_TXT << "3. Winning:" << RESET << endl;
+        cout << MARGIN << "   The game ends when the board is full or no valid moves remain." << endl;
+        cout << MARGIN << "   The player with the most discs wins." << endl;
+        cout << "\n\n" << MARGIN << BG_GREEN << BLACK_TXT << " Press any key to return... " << RESET;
         
-        temp = getch();
+        getch();
         ShowMenu();
         break;
     case '3': // History
@@ -313,7 +366,7 @@ void ShowMenu(){
         break;
     
     default:
-        cout << "Invalid Input!\tTry again.";
+        cout << "\a";
         ShowMenu();
         break;
     }
@@ -324,9 +377,19 @@ void ShowMenu(){
 void GameMode(){
     system("cls");
 
-    cout << "Choose Game Mode:\n" 
-         << "1. Single Player Mode\n"
-         << "2. Two Player Mode\n";
+    cout << "\n\n";
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╔══════════════════════════════════╗" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"║         SELECT GAME MODE         ║" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╚══════════════════════════════════╝" << RESET << endl;
+    cout << endl;
+
+    cout << MARGIN << YELLOW_TXT << "[1]" << WHITE_TXT << " Single Player" << endl;
+    cout << MARGIN << "    " << GREEN_TXT << "Challenge the AI Bot" << RESET << "\n\n";
+    cout << MARGIN << YELLOW_TXT << "[2]" << WHITE_TXT << " Two Players" << endl;
+    cout << MARGIN << "    " << GREEN_TXT << "Play with a friend on this device" << RESET << "\n\n";
+    cout << MARGIN << YELLOW_TXT << "[3]" << WHITE_TXT << " Back to Main Menu" << endl;
+
+    cout << endl << MARGIN << "Select an option: ";
 
     char choice = getch();
 
@@ -340,14 +403,15 @@ void GameMode(){
         game.isSinglePlayerMode = false;
         PlayGame();
         break;
+    case '3':
+        ShowMenu();
+        break;
     default:
-        cout << "Invalid Input!\tTry again.";
+        cout << '\a';
         GameMode();
         break;
     }
 
-
-    ShowBoard(0, 0);
 }
 
 
@@ -359,18 +423,6 @@ void PlaceCell(int i, int j){
     else{
         game.board[i][j] = cell_state.white;
     }
-
-    // finding the first cell that is empty to place the curser
-    // for(int i = board_size - 1; i >= 0; i--){
-    //     for(int j = board_size - 1; j >= 0; j--){
-    //         if(game.board[i][j] == cell_state.empty){
-    //             curserI = i;
-    //             curserJ = j;
-    //         }
-    //     }
-    // }
-
-
 }
 
 
@@ -471,22 +523,31 @@ void ChangeColor(){
 void ShowHistory(){
     system("cls");
 
-    cout << left
-         << setw(10) << "P1"
-         << setw(8)  << "D1"
-         << setw(10) << "P2"
-         << setw(8)  << "D2"
-         << setw(10) << "Winner"
-         << setw(10) << "Date"
-         << endl;
+    cout << "\n\n";
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╔══════════════════════════════════════════════════════════════╗" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"║                   GAME HISTORY ARCHIVE                       ║" << RESET << endl;
+    cout << MARGIN << BOLD << CYAN_TXT << u8"╚══════════════════════════════════════════════════════════════╝" << RESET << endl;
+    cout << endl;
 
-    cout << string(56, '-') << endl;
-
-    ifstream history("history.txt"); // باز کردن برای خواندن
+    ifstream history("history.txt");
     if(!history.is_open()){
-        cout << "No history found or could not open file.\n";
-        getch(); ShowMenu(); return;
+        cout << MARGIN << RED_TXT << "No history found or could not open file." << RESET << endl;
+        cout << "\n" << MARGIN << "Press any key to return...";
+        getch();
+        ShowMenu();
+        return;
     }
+
+    cout << MARGIN << YELLOW_TXT << left
+         << setw(12) << "Player 1"
+         << setw(8)  << "Score"
+         << setw(12) << "Player 2"
+         << setw(8)  << "Score"
+         << setw(12) << "Winner"
+         << setw(20) << "Date"
+         << RESET << endl;
+    cout << MARGIN << CYAN_TXT << u8"──────────────────────────────────────────────────────────────────────" << RESET << endl;
+
 
 
     string line;
@@ -508,20 +569,20 @@ void ShowHistory(){
         winner = line.substr(splitter[3] + 1, splitter[4] - splitter[3] - 1);
         date = line.substr(splitter[4] + 1);
 
-        cout << left
-            << setw(10) << player1
-            << setw(8)  << player1discs
-            << setw(10) << player2
-            << setw(8)  << player2discs
-            << setw(10) << winner
-            << setw(10) << date
+        cout << MARGIN << left
+            << CYAN_TXT   << setw(12) << player1        
+            << BOLD << WHITE_TXT  << setw(8)  << player1discs   
+            << RESET << CYAN_TXT   << setw(12) << player2        
+            << BOLD << WHITE_TXT  << setw(8)  << player2discs   
+            << RESET << GREEN_TXT  << setw(12) << winner         
+            << RESET      << setw(20) << date           
             << endl;
 
     }
 
 
     history.close();
-    cout << "\n\nPress any key to go to menu.";
+    cout << "\n\n" << MARGIN << BG_GREEN << BLACK_TXT << " Press any key to return... " << RESET;
     getch();
     ShowMenu();
 
